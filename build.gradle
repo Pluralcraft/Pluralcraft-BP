@@ -1,0 +1,88 @@
+/*
+ * Copyright (c) 2021 tecc
+ * This code is licenced under the MIT licence.
+ */
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
+
+String rp(String s) {
+    return "me.tecc.pluralcraft.bp.internal.$s"
+}
+
+allprojects {
+    apply plugin: JavaPlugin
+    apply plugin: ShadowPlugin
+
+    group 'me.tecc.pluralcraft.bp'
+    version '1.0'
+
+    repositories {
+        mavenCentral()
+        maven {
+            name 'SpigotMC Hub Snapshots'
+            url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots'
+        }
+        maven {
+            name 'Sonatype OSS Snapshots'
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
+        }
+        maven {
+            name 'dmulloy2 Public'
+            url 'https://repo.dmulloy2.net/repository/public'
+        }
+        maven {
+            name 'InventiveTalent Public'
+            url 'https://repo.inventivetalent.org/content/groups/public'
+        }
+        maven {
+            name 'CodeMC Public'
+            url 'https://repo.codemc.org/repository/maven-public'
+        }
+    }
+
+    dependencies {
+        compileOnly 'org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT'
+        compileOnly 'org.jetbrains:annotations:21.0.1'
+        compileOnly 'com.comphenix.protocol:ProtocolLib:4.7.0'
+        implementation 'com.google.code.gson:gson:2.8.7'
+        implementation 'com.comphenix.packetwrapper:PacketWrapper:1.13-R0.1-SNAPSHOT'
+        implementation 'de.tr7zw:item-nbt-api:2.8.0'
+        implementation 'org.mineskin:java-client:1.0.4-SNAPSHOT'
+        implementation 'com.konghq:unirest-java:3.11.12'
+
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    processResources {
+        outputs.upToDateWhen { false }
+        filesMatching(Arrays.asList("plugin.yml", "config.yml")) {
+            expand(project: project, schema: '$schema')
+        }
+    }
+
+    shadowJar {
+        for (def p : ["com.google.gson", "com.comphenix.packetwrapper", "de.tr7zw", "org.mineskin", "com.konghq"])
+            relocate(p, rp(p))
+    }
+
+    task moveToLatest(type: Copy) {
+        dependsOn shadowJar
+        from jar.archiveFile
+        from shadowJar.archiveFile
+        rename "${project.name}-${version}(-all)?.jar", "${project.name}-latest\$1.jar"
+        into jar.destinationDirectory.getAsFile()
+    }
+
+    build.dependsOn shadowJar
+    build.dependsOn moveToLatest
+}

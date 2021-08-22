@@ -1,0 +1,21 @@
+name: Pluralcraft-BP
+main: me.tecc.pluralcraft.bp.PluralcraftBP
+version: ${project.version}
+api-version: 1.17
+
+depend:
+    - ProtocolLib
+
+commands:
+    pluralcraft-bp:
+        description: Main command for Pluralcraft BP
+        aliases:
+            - pc-bp
+            - pcbp
+            - p-bp
+            - pbp
+            - pc
+    switch:
+        description: Shorthand for switching
+        aliases:
+            - sw
