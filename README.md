@@ -1,4 +1,4 @@
-# Pluralcraft BP
+# Pluralcraft BP (not being worked on)
 
 Pluralcraft BP is the bodged and probably buggy version of Pluralcraft.
 
